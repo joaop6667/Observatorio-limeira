@@ -1,0 +1,11 @@
+# Android
+android/build/
+*.apk
+*.jks
+# Windows
+windows/dist/
+windows/*.syso
+windows/go.sum
+# Sistema
+.DS_Store
+Thumbs.db

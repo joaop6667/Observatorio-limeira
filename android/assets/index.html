@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>Observatório Limeira</title>
+<style>
+:root{
+  --bg:#0b1220; --card:#131c2e; --card2:#1a2540; --line:#25324d;
+  --txt:#e8eefc; --mut:#93a1bd; --blue:#1557dc; --blue2:#0f3fa8; --sky:#6ea8ff;
+  --ok:#34d399; --warn:#fbbf24; --bad:#f87171; --gold:#facc15;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--txt);font:15px/1.4 Roboto,"Segoe UI",system-ui,sans-serif;
+  overscroll-behavior:none}
+button,input,select,textarea{font:inherit;color:inherit}
+header{position:fixed;top:0;left:0;right:0;z-index:20;background:linear-gradient(135deg,var(--blue),var(--blue2));
+  padding:12px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 2px 10px rgba(0,0,0,.4)}
+header .logo{width:34px;height:34px;border-radius:9px;background:#0b1220;display:grid;place-items:center;flex:none}
+header .logo i{width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 0 5px #fff inset, 0 0 0 0 #fff}
+header .logo i{background:var(--gold);box-shadow:0 0 0 4px #0b1220,0 0 0 7px #fff}
+header h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
+header small{display:block;font-size:11.5px;opacity:.85;font-weight:400}
+header .hbtn{margin-left:auto;background:rgba(255,255,255,.14);border:0;border-radius:10px;width:38px;height:38px;font-size:18px}
+main{padding:72px 14px 92px;max-width:760px;margin:0 auto}
+nav{position:fixed;bottom:0;left:0;right:0;z-index:20;background:#0e1729;border-top:1px solid var(--line);display:flex}
+nav button{flex:1;background:none;border:0;padding:9px 4px 11px;color:var(--mut);font-size:12px;font-weight:600;
+  display:flex;flex-direction:column;align-items:center;gap:3px}
+nav button svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav button.on{color:var(--sky)}
+nav button.on::before{content:"";position:absolute;margin-top:-9px;width:42px;height:3px;border-radius:0 0 3px 3px;background:var(--sky)}
+
+.row{display:flex;gap:8px;align-items:center}
+.grow{flex:1;min-width:0}
+.mut{color:var(--mut)} .sm{font-size:12.5px} .xs{font-size:11.5px}
+.num{font-variant-numeric:tabular-nums}
+h2{font-size:16px;margin:18px 2px 10px}
+.field,select.field{width:100%;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 12px;outline:none}
+.field:focus{border-color:var(--sky)}
+label.lb{display:block;font-size:12px;color:var(--mut);margin:12px 2px 5px;font-weight:600}
+.btn{background:var(--card2);border:1px solid var(--line);border-radius:12px;padding:11px 14px;font-weight:600;white-space:nowrap}
+.btn:active{filter:brightness(1.25)}
+.btn.pri{background:var(--blue);border-color:var(--blue)}
+.btn.bad{background:#4a1d24;border-color:#7f2d38;color:#ffc9c9}
+.btn.ok{background:#0f3d31;border-color:#1b6b55;color:#b9f6de}
+.btn.ghost{background:none}
+.btn.wide{width:100%}
+.btn.s{padding:7px 11px;font-size:13px;border-radius:10px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px}
+.note{background:#12203c;border:1px solid #23406f;color:#bcd3ff;border-radius:12px;padding:10px 12px;font-size:12.5px;margin:10px 0}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:700;background:#1e2c4a;color:#b7c8ea;white-space:nowrap}
+.chip.ok{background:#0f3d31;color:#8ff0cb}.chip.bad{background:#4a1d24;color:#ffb4b4}.chip.warn{background:#463a10;color:#fde68a}
+.av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;font-weight:700;font-size:15px;color:#fff;
+  background-size:cover;background-position:center;overflow:hidden}
+.av.lg{width:84px;height:84px;font-size:26px}
+
+/* vereadores */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.vcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 10px 12px;text-align:center}
+.vcard .av{width:64px;height:64px;font-size:20px;margin:0 auto 8px}
+.vcard b{display:block;font-size:14px;line-height:1.2}
+.vcard .chip{margin-top:7px}
+.vcard.off{opacity:.5}
+
+/* sessão */
+.srow{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;margin-bottom:8px;display:flex;gap:10px;align-items:center}
+.srow.out{border-color:#7f2d38;background:#201620}
+.srow.falta{opacity:.75}
+.srow b{display:block;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer{font-size:30px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.5px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:18px;font-variant-numeric:tabular-nums}
+.stat span{font-size:11px;color:var(--mut)}
+.bar{height:6px;border-radius:3px;background:#2a1a22;overflow:hidden;margin-top:5px}
+.bar i{display:block;height:100%;background:var(--ok);border-radius:3px}
+
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-size:11px;text-align:right;color:var(--mut);font-weight:700;padding:6px 6px;border-bottom:1px solid var(--line)}
+td{padding:9px 6px;border-bottom:1px solid var(--line);text-align:right;font-variant-numeric:tabular-nums}
+td{white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+td:first-child{white-space:normal}
+td small{display:block;color:var(--mut);font-size:11px}
+
+/* sheet */
+#ov{position:fixed;inset:0;z-index:50;background:rgba(3,7,16,.66);display:none;align-items:flex-end;justify-content:center}
+#ov.on{display:flex}
+#sheet{background:#101a2d;border:1px solid var(--line);border-bottom:0;border-radius:18px 18px 0 0;width:100%;max-width:760px;
+  max-height:90vh;overflow:auto;padding:16px 16px 22px}
+#sheet h3{margin:0 0 4px;font-size:17px}
+#toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:80;background:#e8eefc;color:#0b1220;
+  padding:9px 16px;border-radius:999px;font-size:13px;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+#toast.on{opacity:1}
+.empty{text-align:center;color:var(--mut);padding:36px 16px}
+.print-only{display:none}
+
+@media print{
+  :root{--bg:#fff;--card:#fff;--card2:#fff;--line:#bbb;--txt:#000;--mut:#444}
+  body{background:#fff;color:#000;font-size:11pt}
+  header,nav,.no-print,#ov,#toast{display:none!important}
+  main{padding:0;max-width:none}
+  .print-only{display:block}
+  .card,.stat,.note{border-color:#999;background:#fff;color:#000}
+  .chip{background:#eee!important;color:#000!important}
+  tr{page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="logo"><i></i></div>
+  <div><h1>Observatório Limeira</h1><small>Presença nas sessões ordinárias da Câmara</small></div>
+  <button class="hbtn" id="btnMenu" aria-label="Menu">⋮</button>
+</header>
+<main id="main"></main>
+<nav>
+  <button data-tab="ver"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.6-3.6 3.2-5.5 6.5-5.5s5.9 1.9 6.5 5.5"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5c2.4.1 4 1.6 4.5 4"/></svg>Vereadores</button>
+  <button data-tab="pre"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2.5h6"/></svg>Presença</button>
+  <button data-tab="rel"><svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6zM14 3v5h5M9 17v-3M12 17v-6M15 17v-2"/></svg>Relatórios</button>
+</nav>
+<div id="ov"><div id="sheet"></div></div>
+<div id="toast"></div>
+<input type="file" id="filePhoto" accept="image/*" hidden>
+<input type="file" id="fileBackup" accept="application/json" hidden>
+
+<script>
+"use strict";
+/* ======================= DADOS ======================= */
+var KEY = "observatorio-limeira-v1";
+var FONTE = "https://www.limeira.sp.leg.br/vereadores/legislatura_atual";
+var SEED = [
+ ["Bruna Magalhães","Bruna Magalhães de Sousa","PRTB"],
+ ["Carlinhos do Grotta","José Carlos Barbosa de Freitas","PL"],
+ ["Costa Júnior","Vicente Soares da Costa Junior","PODE"],
+ ["Dr. Marcelo Rossi","Marcelo Rossi","MDB"],
+ ["Elias Barbosa","Elias Ribeiro Barbosa","PRTB"],
+ ["Estevão Nogueira","Estevão Nogueira","Avante"],
+ ["Everton Ferreira","Everton Oliveira Ferreira","PSD"],
+ ["Felipe Penedo","Felipe Penedo de Barros","PL"],
+ ["Guilherme Guido","Guilherme Augusto Guido","PL"],
+ ["Helder do Táxi","Helder Lucio de Oliveira","PSD"],
+ ["Isabelly Carvalho","Isabelly Maria de Carvalho","PT"],
+ ["João Antunes Bano","João Antunes Souza","Solidariedade"],
+ ["Joyce Dias","Joyce Dias dos Santos","PSD"],
+ ["Lu Bogo","Lucineis Aparecida Bogo","PL"],
+ ["Mara Isa","Mara Isa Mattos Silveira","PL"],
+ ["Márcio do Estacionamento","Márcio dos Santos Vidal","DC"],
+ ["Marco Xavier","Marco Antônio Xavier","PP"],
+ ["Mariana Calsa","Mariana Silva Calsa","PSB"],
+ ["Nilton Santos","Nilton César dos Santos","Republicanos"],
+ ["Tatiane Lopes","Tatiane Lopes","Avante"],
+ ["Zé da Farmácia","José Aparecido Maciel","Solidariedade"]
+];
+function seedState(){
+  return {v:1, vereadores: SEED.map(function(r,i){return {id:"v"+(i+1),nome:r[0],civil:r[1],partido:r[2],foto:"",ativo:true};}), sessoes:[]};
+}
+var S;
+// Versão Windows: a página é servida pelo próprio programa (http://127.0.0.1) e os dados vão para um arquivo em disco
+var DESK = location.protocol==="http:";
+var TOKEN = (location.search.match(/[?&]t=([\w-]+)/)||[])[1]||"";
+function load(){
+  var raw=null;
+  if(DESK){ try{ var x=new XMLHttpRequest(); x.open("GET","/state?t="+TOKEN,false); x.send(); if(x.status===200&&x.responseText) raw=x.responseText; }catch(e){} }
+  if(!raw){ try{ raw=localStorage.getItem(KEY); }catch(e){} }
+  try{ S = raw ? JSON.parse(raw) : null; }catch(e){ S = null; }
+  if(!S || !S.vereadores || !S.sessoes) S = seedState();
+}
+function save(){
+  var j=JSON.stringify(S);
+  if(DESK){
+    try{ var x=new XMLHttpRequest(); x.open("POST","/state?t="+TOKEN,false); x.send(j); if(x.status!==200) throw 0; }
+    catch(e){ toast("Erro ao gravar os dados no disco."); }
+    return;
+  }
+  try{ localStorage.setItem(KEY, j); }
+  catch(e){ toast("Sem espaço para salvar. Remova fotos ou sessões antigas."); }
+}
+
+/* ======================= UTIL ======================= */
+var MIN = 60000;
+function $(s,r){return (r||document).querySelector(s);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+function p2(n){return (n<10?"0":"")+n;}
+function hm(ms){var d=new Date(ms);return p2(d.getHours())+":"+p2(d.getMinutes());}
+function dmy(ms){var d=new Date(ms);return p2(d.getDate())+"/"+p2(d.getMonth()+1)+"/"+d.getFullYear();}
+function ymd(ms){var d=new Date(ms);return d.getFullYear()+"-"+p2(d.getMonth()+1)+"-"+p2(d.getDate());}
+function mkTime(dateStr,timeStr){ // "2026-11-12","19:30" -> ms local
+  var a=dateStr.split("-"),b=timeStr.split(":");
+  return new Date(+a[0],+a[1]-1,+a[2],+b[0],+b[1],0,0).getTime();
+}
+function dur(ms){ // duração legível em minutos
+  var m=Math.round(ms/MIN); if(m<60) return m+" min";
+  var h=Math.floor(m/60); m=m%60; return h+"h"+(m?" "+p2(m)+"min":"");
+}
+function clock(ms){ // h:mm:ss
+  var s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor(s%3600/60); s=s%60;
+  return (h?h+":":"")+p2(m)+":"+p2(s);
+}
+function pct(x){return (Math.round(x*10)/10).toFixed(1).replace(".",",")+"%";}
+function minDec(ms){return (Math.round(ms/MIN*10)/10).toFixed(1).replace(".",",");}
+function initials(n){var p=n.replace(/^(Dr\.|Dra\.)\s*/i,"").trim().split(/\s+/);return ((p[0]||"?")[0]+(p.length>1?p[p.length-1][0]:"")).toUpperCase();}
+var PAL=["#2563eb","#7c3aed","#db2777","#dc2626","#ea580c","#ca8a04","#16a34a","#0d9488","#0891b2","#4f46e5","#9333ea","#be123c"];
+function colorFor(str){var h=0;for(var i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))>>>0;return PAL[h%PAL.length];}
+function avatar(v,cls){
+  if(v.foto) return '<div class="av '+(cls||"")+'" style="background-image:url('+v.foto+')"></div>';
+  return '<div class="av '+(cls||"")+'" style="background:'+colorFor(v.partido||v.nome)+'">'+esc(initials(v.nome))+'</div>';
+}
+function vById(id){for(var i=0;i<S.vereadores.length;i++)if(S.vereadores[i].id===id)return S.vereadores[i];return {id:id,nome:"(removido)",civil:"",partido:"",foto:""};}
+function sById(id){for(var i=0;i<S.sessoes.length;i++)if(S.sessoes[i].id===id)return S.sessoes[i];return null;}
+function byName(a,b){return a.nome.localeCompare(b.nome,"pt-BR");}
+var toastT;
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(toastT);toastT=setTimeout(function(){t.classList.remove("on");},2400);}
+
+/* ======================= CÁLCULO ======================= */
+// Fim de referência: fim registrado ou "agora" (sessão em andamento)
+function sEnd(s){return s.fim!=null?s.fim:Math.max(Date.now(),s.inicio);}
+function sDur(s){return Math.max(0,sEnd(s)-s.inicio);}
+// Une intervalos sobrepostos e limita à janela monitorada (sem dupla contagem)
+function mergeIntervals(list,a,b){
+  var xs=[];
+  list.forEach(function(x){
+    var i=Math.max(x.ini,a), f=Math.min(x.fim==null?b:x.fim,b);
+    if(f>i) xs.push([i,f]);
+  });
+  xs.sort(function(p,q){return p[0]-q[0];});
+  var out=[];
+  xs.forEach(function(x){
+    var l=out[out.length-1];
+    if(l&&x[0]<=l[1]) l[1]=Math.max(l[1],x[1]); else out.push([x[0],x[1]]);
+  });
+  return out;
+}
+function calc(s,vid){
+  var a=s.inicio,b=sEnd(s),d=b-a;
+  var mine=s.ausencias.filter(function(x){return x.vid===vid;});
+  var falta=!!(s.faltas&&s.faltas[vid]);
+  var merged=falta?(d>0?[[a,b]]:[]):mergeIntervals(mine,a,b);
+  var aus=merged.reduce(function(t,x){return t+(x[1]-x[0]);},0);
+  var open=null; mine.forEach(function(x){if(x.fim==null)open=x;});
+  return {dur:d,aus:aus,pres:d-aus,pct:d>0?(d-aus)/d*100:100,merged:merged,raw:mine,falta:falta,open:open,saidas:falta?0:merged.length};
+}
+function calcGeral(vid,sess){
+  var d=0,aus=0,n=0,saidas=0,faltas=0;
+  sess.forEach(function(s){
+    if(s.vids.indexOf(vid)<0) return;
+    var c=calc(s,vid); d+=c.dur; aus+=c.aus; n++; saidas+=c.saidas; if(c.falta)faltas++;
+  });
+  return {dur:d,aus:aus,pres:d-aus,pct:d>0?(d-aus)/d*100:100,n:n,saidas:saidas,faltas:faltas};
+}
+
+/* ======================= NAVEGAÇÃO ======================= */
+var UI={tab:"ver",busca:"",partido:"",sessao:null,escopo:"",soAtivos:true};
+function go(tab){UI.tab=tab;render();window.scrollTo(0,0);}
+function render(){
+  [].forEach.call(document.querySelectorAll("nav button"),function(b){b.classList.toggle("on",b.dataset.tab===UI.tab);});
+  var m=$("#main");
+  if(UI.tab==="ver") m.innerHTML=viewVereadores();
+  else if(UI.tab==="pre") m.innerHTML=UI.sessao&&sById(UI.sessao)?viewSessao(sById(UI.sessao)):viewSessoes();
+  else m.innerHTML=viewRelatorio();
+  tick();
+}
+function openSheet(html){$("#sheet").innerHTML=html;$("#ov").classList.add("on");}
+function closeSheet(){$("#ov").classList.remove("on");$("#sheet").innerHTML="";}
+function sheetOpen(){return $("#ov").classList.contains("on");}
+window.onAndroidBack=function(){
+  if(sheetOpen()){closeSheet();return true;}
+  if(UI.tab==="pre"&&UI.sessao){UI.sessao=null;render();return true;}
+  if(UI.tab!=="ver"){go("ver");return true;}
+  return false;
+};
+
+/* ======================= VEREADORES ======================= */
+function partidos(){var o={};S.vereadores.forEach(function(v){if(v.partido)o[v.partido]=1;});return Object.keys(o).sort(function(a,b){return a.localeCompare(b,"pt-BR");});}
+function viewVereadores(){
+  var ativos=S.vereadores.filter(function(v){return v.ativo;}).length;
+  var h='<div class="row"><input class="field grow" id="busca" placeholder="Buscar por nome…" value="'+esc(UI.busca)+'">'+
+    '<select class="field" id="fPartido" style="width:auto;max-width:42%"><option value="">Partidos</option>'+
+    partidos().map(function(p){return '<option'+(UI.partido===p?" selected":"")+'>'+esc(p)+'</option>';}).join("")+'</select></div>';
+  h+='<div class="row" style="margin:12px 2px 10px"><div class="grow mut sm"><b style="color:var(--txt)">'+ativos+'</b> vereadores em exercício'+
+    (S.vereadores.length>ativos?' · '+(S.vereadores.length-ativos)+' inativos':'')+'</div>'+
+    '<button class="btn s pri" data-act="vNovo">+ Adicionar</button></div>';
+  h+='<div class="grid" id="vgrid">'+vGrid()+'</div>';
+  h+='<div class="note">Lista inicial conforme a página “Legislatura atual” da Câmara Municipal de Limeira, consultada em 12/11/2026. '+
+     'Confira e atualize quando houver posse de suplentes ou troca de partido. Toque em um vereador para editar ou incluir a foto.</div>';
+  return h;
+}
+function vGrid(){
+  var q=UI.busca.trim().toLowerCase();
+  var norm=function(s){return s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");};
+  var nq=norm(q);
+  var l=S.vereadores.filter(function(v){
+    if(UI.partido&&v.partido!==UI.partido) return false;
+    if(nq&&norm(v.nome+" "+v.civil).indexOf(nq)<0) return false;
+    return true;
+  }).sort(function(a,b){return (b.ativo-a.ativo)||byName(a,b);});
+  if(!l.length) return '<div class="empty" style="grid-column:1/-1">Nenhum vereador encontrado.</div>';
+  return l.map(function(v){
+    return '<div class="vcard'+(v.ativo?"":" off")+'" data-act="vEdit" data-id="'+v.id+'">'+avatar(v)+'<b>'+esc(v.nome)+'</b>'+
+      '<span class="chip">'+esc(v.partido||"sem partido")+'</span>'+(v.ativo?"":'<div class="xs mut" style="margin-top:4px">Inativo</div>')+'</div>';
+  }).join("");
+}
+var editFoto="";
+function sheetVereador(id){
+  var v=id?vById(id):{id:"",nome:"",civil:"",partido:"",foto:"",ativo:true};
+  editFoto=v.foto||"";
+  var g=id?calcGeral(id,S.sessoes.filter(function(s){return s.fim!=null;})):null;
+  openSheet('<h3>'+(id?"Editar vereador":"Novo vereador")+'</h3>'+
+    '<div class="row" style="margin-top:12px"><div id="fotoPrev">'+avatar({nome:v.nome||"?",partido:v.partido,foto:editFoto},"lg")+'</div>'+
+    '<div class="grow"><button class="btn s" data-act="vFoto">Escolher foto</button> '+
+    '<button class="btn s ghost" data-act="vFotoDel">Remover</button><div class="xs mut" style="margin-top:6px">A foto fica salva só neste aparelho.</div></div></div>'+
+    '<label class="lb">Nome parlamentar</label><input class="field" id="vNome" value="'+esc(v.nome)+'">'+
+    '<label class="lb">Nome completo</label><input class="field" id="vCivil" value="'+esc(v.civil)+'">'+
+    '<label class="lb">Partido (sigla)</label><input class="field" id="vPart" value="'+esc(v.partido)+'" list="dlPart"><datalist id="dlPart">'+
+      partidos().map(function(p){return '<option value="'+esc(p)+'">';}).join("")+'</datalist>'+
+    '<label class="row" style="margin-top:14px"><input type="checkbox" id="vAtivo" '+(v.ativo?"checked":"")+' style="width:20px;height:20px"> '+
+      '<span>Em exercício (entra nas novas sessões)</span></label>'+
+    (g&&g.n?'<div class="note">Histórico: '+g.n+' sessão(ões) encerrada(s) · presença de <b>'+pct(g.pct)+'</b> · '+dur(g.aus)+' de ausência.</div>':'')+
+    '<div class="row" style="margin-top:16px">'+(id?'<button class="btn bad" data-act="vDel" data-id="'+id+'">Excluir</button>':'')+
+    '<div class="grow"></div><button class="btn ghost" data-act="close">Cancelar</button><button class="btn pri" data-act="vSave" data-id="'+id+'">Salvar</button></div>');
+}
+function refreshFotoPrev(){$("#fotoPrev").innerHTML=avatar({nome:$("#vNome").value||"?",partido:$("#vPart").value,foto:editFoto},"lg");}
+$("#filePhoto").addEventListener("change",function(){
+  var f=this.files&&this.files[0]; this.value=""; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    var img=new Image();
+    img.onload=function(){
+      var n=160,c=document.createElement("canvas"); c.width=c.height=n;
+      var k=Math.min(img.width,img.height),sx=(img.width-k)/2,sy=(img.height-k)/4; // corte quadrado, levemente acima do centro
+      c.getContext("2d").drawImage(img,sx,Math.max(0,sy),k,k,0,0,n,n);
+      editFoto=c.toDataURL("image/jpeg",0.8); if($("#fotoPrev")) refreshFotoPrev();
+    };
+    img.onerror=function(){toast("Não foi possível ler a imagem.");};
+    img.src=rd.result;
+  };
+  rd.readAsDataURL(f);
+});
+
+/* ======================= SESSÕES ======================= */
+function viewSessoes(){
+  var l=S.sessoes.slice().sort(function(a,b){return b.inicio-a.inicio;});
+  var h='<button class="btn pri wide" data-act="sNova">+ Nova sessão</button>';
+  h+='<div class="note">Inicie a sessão quando começar o acompanhamento. Durante a sessão, toque em <b>Saiu</b> quando o vereador deixar o plenário e em <b>Voltou</b> quando retornar. O aplicativo soma os intervalos e calcula a presença.</div>';
+  if(!l.length) return h+'<div class="empty">Nenhuma sessão registrada ainda.</div>';
+  h+='<h2>Sessões registradas</h2>';
+  l.forEach(function(s){
+    var aberto=s.fim==null;
+    var fora=aberto?s.vids.filter(function(id){var c=calc(s,id);return c.open||c.falta;}).length:0;
+    h+='<div class="srow" data-act="sOpen" data-id="'+s.id+'"><div class="grow"><b>'+esc(s.titulo)+'</b>'+
+      '<div class="sm mut">'+dmy(s.inicio)+' · '+hm(s.inicio)+(aberto?"":" – "+hm(s.fim))+' · '+(aberto?'<span data-live="sdur" data-id="'+s.id+'">'+dur(sDur(s))+'</span>':dur(sDur(s)))+'</div></div>'+
+      (aberto?'<span class="chip warn">Em andamento'+(fora?" · "+fora+" fora":"")+'</span>':'<span class="chip ok">Encerrada</span>')+'</div>';
+  });
+  return h;
+}
+function sheetSessao(id){
+  var s=id?sById(id):null, now=Date.now();
+  var n=S.sessoes.length+1;
+  openSheet('<h3>'+(s?"Editar sessão":"Nova sessão")+'</h3>'+
+    '<label class="lb">Identificação</label><input class="field" id="sTit" value="'+esc(s?s.titulo:n+"ª sessão ordinária acompanhada")+'">'+
+    '<div class="row"><div class="grow"><label class="lb">Data</label><input class="field" type="date" id="sData" value="'+ymd(s?s.inicio:now)+'"></div>'+
+    '<div class="grow"><label class="lb">Início do acompanhamento</label><input class="field" type="time" id="sIni" value="'+hm(s?s.inicio:now)+'"></div></div>'+
+    '<label class="lb">Término '+(s?"":"(deixe em branco para acompanhar ao vivo)")+'</label>'+
+    '<div class="row"><input class="field grow" type="time" id="sFim" value="'+(s&&s.fim!=null?hm(s.fim):"")+'">'+
+    '<button class="btn s ghost" data-act="sFimClr">Limpar</button></div>'+
+    '<div class="xs mut" style="margin-top:6px">Se o término for menor que o início, considera-se o dia seguinte. '+
+    (s?"":'Participam os '+S.vereadores.filter(function(v){return v.ativo;}).length+' vereadores em exercício.')+'</div>'+
+    '<label class="lb">Observações</label><textarea class="field" id="sObs" rows="2">'+esc(s?s.obs||"":"")+'</textarea>'+
+    '<div class="row" style="margin-top:16px">'+(s?'<button class="btn bad" data-act="sDel" data-id="'+s.id+'">Excluir</button>':'')+
+    '<div class="grow"></div><button class="btn ghost" data-act="close">Cancelar</button><button class="btn pri" data-act="sSave" data-id="'+(id||"")+'">'+(s?"Salvar":"Iniciar")+'</button></div>');
+}
+function viewSessao(s){
+  var aberto=s.fim==null;
+  var h='<div class="row no-print"><button class="btn s ghost" data-act="sBack">‹ Sessões</button><div class="grow"></div>'+
+    '<button class="btn s" data-act="sEdit" data-id="'+s.id+'">Editar</button>'+
+    '<button class="btn s" data-act="sRel" data-id="'+s.id+'">Relatório</button></div>';
+  h+='<div class="card" style="margin-top:10px;text-align:center"><div class="sm mut">'+esc(s.titulo)+' · '+dmy(s.inicio)+'</div>'+
+    '<div class="timer" data-live="timer">'+clock(sDur(s))+'</div>'+
+    '<div class="sm mut">Início '+hm(s.inicio)+(aberto?' · <span class="chip warn">em andamento</span>':' · Término '+hm(s.fim)+' · <span class="chip ok">encerrada</span>')+'</div>'+
+    (aberto?'<button class="btn bad wide" style="margin-top:12px" data-act="sEnc" data-id="'+s.id+'">Encerrar sessão</button>'
+           :'<button class="btn wide" style="margin-top:12px" data-act="sReab" data-id="'+s.id+'">Reabrir sessão</button>')+'</div>';
+  var vs=s.vids.map(vById).sort(byName);
+  var fora=0; vs.forEach(function(v){var c=calc(s,v.id);if(c.open||c.falta)fora++;});
+  h+='<div class="row" style="margin:14px 2px 8px"><b class="grow">Vereadores</b><span class="sm mut" data-live="fora">'+(vs.length-fora)+' presentes · '+fora+(fora===1?' ausente':' ausentes')+'</span></div>';
+  vs.forEach(function(v){
+    var c=calc(s,v.id), out=!!c.open;
+    h+='<div class="srow'+(out?" out":"")+(c.falta?" falta":"")+'" data-row="'+v.id+'">'+
+      '<div data-act="sDet" data-id="'+v.id+'" class="row grow" style="gap:10px">'+avatar(v)+'<div class="grow"><b>'+esc(v.nome)+'</b>'+
+      '<div class="sm mut">'+esc(v.partido)+' · <span data-live="aus" data-id="'+v.id+'">'+ausTxt(c)+'</span></div></div></div>'+
+      (c.falta?'<span class="chip bad">Faltou</span>'
+        :aberto?(out?'<button class="btn ok" data-act="sVoltou" data-id="'+v.id+'">Voltou</button>'
+                    :'<button class="btn bad" data-act="sSaiu" data-id="'+v.id+'">Saiu</button>')
+        :'<span class="chip '+(c.pct>=90?"ok":c.pct>=70?"warn":"bad")+'">'+pct(c.pct)+'</span>')+
+      '</div>';
+  });
+  h+='<div class="xs mut" style="text-align:center;margin-top:10px">Toque no nome para ver os intervalos, lançar uma ausência manualmente ou marcar falta na sessão inteira.</div>';
+  return h;
+}
+function ausTxt(c){
+  if(c.falta) return "ausente na sessão inteira";
+  if(c.open) return "fora há "+clock(Date.now()-c.open.ini)+" · total "+dur(c.aus);
+  return c.aus>0?"ausente "+dur(c.aus)+" ("+c.saidas+(c.saidas>1?" saídas":" saída")+")":"sem ausências";
+}
+function tick(){
+  if(UI.tab!=="pre") return;
+  if(UI.sessao){
+    var s=sById(UI.sessao); if(!s||s.fim!=null) return;
+    var t=$('[data-live="timer"]'); if(t) t.textContent=clock(sDur(s));
+    [].forEach.call(document.querySelectorAll('[data-live="aus"]'),function(e){e.textContent=ausTxt(calc(s,e.dataset.id));});
+  }else{
+    [].forEach.call(document.querySelectorAll('[data-live="sdur"]'),function(e){var s=sById(e.dataset.id);if(s)e.textContent=dur(sDur(s));});
+  }
+}
+setInterval(tick,1000);
+
+function sheetDetalhe(s,vid){
+  var v=vById(vid), c=calc(s,vid), aberto=s.fim==null;
+  var h='<div class="row">'+avatar(v)+'<div class="grow"><h3>'+esc(v.nome)+'</h3><div class="sm mut">'+esc(v.partido)+' · '+esc(s.titulo)+'</div></div></div>';
+  h+='<div class="stats"><div class="stat"><b>'+dur(c.aus)+'</b><span>ausente</span></div><div class="stat"><b>'+dur(c.pres)+'</b><span>presente</span></div>'+
+     '<div class="stat"><b>'+pct(c.pct)+'</b><span>presença</span></div></div>';
+  h+='<label class="row card" style="margin-bottom:10px"><input type="checkbox" id="dFalta" data-id="'+vid+'" '+(c.falta?"checked":"")+' style="width:20px;height:20px"> '+
+     '<span>Não compareceu / ausente na sessão inteira</span></label>';
+  h+='<b class="sm">Intervalos de ausência</b>';
+  if(!c.raw.length) h+='<div class="sm mut" style="padding:8px 0">Nenhum intervalo registrado.</div>';
+  c.raw.slice().sort(function(a,b){return a.ini-b.ini;}).forEach(function(x){
+    var f=x.fim==null?sEnd(s):x.fim;
+    h+='<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div class="grow num">'+hm(x.ini)+' – '+(x.fim==null?(aberto?"em aberto":hm(f)):hm(x.fim))+
+       ' <span class="mut sm">· '+dur(f-x.ini)+'</span>'+(x.obs?'<div class="xs mut">'+esc(x.obs)+'</div>':'')+'</div>'+
+       '<button class="btn s bad" data-act="aDel" data-id="'+x.id+'" data-vid="'+vid+'">Excluir</button></div>';
+  });
+  if(c.raw.length>c.merged.length&&!c.falta) h+='<div class="xs mut" style="margin-top:6px">Intervalos sobrepostos são unidos no cálculo (sem dupla contagem).</div>';
+  h+='<div class="card" style="margin-top:14px"><b class="sm">Lançar ausência manualmente</b>'+
+     '<div class="row"><div class="grow"><label class="lb">Saída</label><input class="field" type="time" id="aIni"></div>'+
+     '<div class="grow"><label class="lb">Retorno</label><input class="field" type="time" id="aFim"></div></div>'+
+     '<div class="xs mut" style="margin:6px 0">Ou informe a saída e a duração em minutos:</div>'+
+     '<input class="field" type="number" inputmode="numeric" min="1" id="aMin" placeholder="Duração (min)">'+
+     '<input class="field" id="aObs" placeholder="Observação (opcional)" style="margin-top:8px">'+
+     '<button class="btn pri wide" style="margin-top:10px" data-act="aAdd" data-vid="'+vid+'">Adicionar intervalo</button></div>';
+  h+='<button class="btn wide ghost" style="margin-top:10px" data-act="close">Fechar</button>';
+  openSheet(h);
+}
+function parseInSession(s,t){ // hora HH:MM dentro da janela da sessão (vira o dia se preciso)
+  var ms=mkTime(ymd(s.inicio),t);
+  if(ms<Math.floor(s.inicio/MIN)*MIN) ms+=24*60*MIN;
+  return ms;
+}
+
+/* ======================= RELATÓRIOS ======================= */
+function viewRelatorio(){
+  var enc=S.sessoes.filter(function(s){return s.fim!=null;}).sort(function(a,b){return b.inicio-a.inicio;});
+  var todas=S.sessoes.slice().sort(function(a,b){return b.inicio-a.inicio;});
+  if(!todas.length) return '<div class="empty">Ainda não há sessões registradas.<br>Inicie uma sessão na aba <b>Presença</b> para gerar relatórios.</div>';
+  if(UI.escopo&&UI.escopo!=="geral"&&!sById(UI.escopo)) UI.escopo="";
+  if(!UI.escopo) UI.escopo=enc.length>1?"geral":todas[0].id;
+  var geral=UI.escopo==="geral", s=geral?null:sById(UI.escopo);
+  var h='<div class="no-print"><select class="field" id="rEscopo"><option value="geral"'+(geral?" selected":"")+'>Geral — todas as sessões encerradas ('+enc.length+')</option>'+
+    todas.map(function(x){return '<option value="'+x.id+'"'+(UI.escopo===x.id?" selected":"")+'>'+esc(x.titulo)+' — '+dmy(x.inicio)+(x.fim==null?" (em andamento)":"")+'</option>';}).join("")+'</select></div>';
+  h+='<div class="print-only"><h1 style="font-size:16pt;margin:0">Observatório Limeira</h1><div>Relatório de presença nas sessões ordinárias da Câmara Municipal de Limeira – SP</div><hr></div>';
+  var rows, titulo, sub;
+  if(geral){
+    if(!enc.length) return h+'<div class="empty">Nenhuma sessão encerrada ainda. Encerre uma sessão para o relatório geral.</div>';
+    var ids={}; enc.forEach(function(x){x.vids.forEach(function(i){ids[i]=1;});});
+    rows=Object.keys(ids).map(function(id){var c=calcGeral(id,enc);c.v=vById(id);return c;});
+    var tot=enc.reduce(function(t,x){return t+sDur(x);},0);
+    titulo="Relatório geral"; sub=enc.length+" sessões encerradas · "+dmy(enc[enc.length-1].inicio)+" a "+dmy(enc[0].inicio);
+    h+=relHead(titulo,sub,[[enc.length,"sessões"],[dur(tot),"tempo monitorado"],[media(rows),"presença média"]]);
+  }else{
+    rows=s.vids.map(function(id){var c=calc(s,id);c.v=vById(id);c.n=1;return c;});
+    titulo=s.titulo; sub=dmy(s.inicio)+" · "+hm(s.inicio)+" – "+(s.fim==null?"em andamento":hm(s.fim));
+    h+=relHead(titulo,sub,[[dur(sDur(s)),"duração monitorada"],[rows.filter(function(r){return r.aus>0;}).length,"com ausência"],[media(rows),"presença média"]]);
+    if(s.fim==null) h+='<div class="note">Sessão em andamento: os números abaixo são parciais.</div>';
+    if(s.obs) h+='<div class="note">Observações: '+esc(s.obs)+'</div>';
+  }
+  rows.sort(function(a,b){return (a.pct-b.pct)||byName(a.v,b.v);});
+  h+='<div class="card" style="padding:6px 8px;margin-top:10px"><table><tr><th>Vereador</th>'+(geral?"<th>Sessões</th>":"<th>Saídas</th>")+'<th>Ausente</th><th>Presente</th><th>Presença</th></tr>';
+  rows.forEach(function(r){
+    h+='<tr data-act="rDet" data-id="'+r.v.id+'"><td><b>'+esc(r.v.nome)+'</b><small>'+esc(r.v.partido)+(r.falta?" · faltou":r.faltas?" · "+r.faltas+" falta(s)":"")+'</small></td>'+
+      '<td>'+(geral?r.n:(r.falta?"—":r.saidas))+'</td><td>'+dur(r.aus)+'</td><td>'+dur(r.pres)+'</td>'+
+      '<td><b style="color:'+(r.pct>=90?"var(--ok)":r.pct>=70?"var(--warn)":"var(--bad)")+'">'+pct(r.pct)+'</b><div class="bar no-print"><i style="width:'+r.pct.toFixed(1)+'%"></i></div></td></tr>';
+  });
+  h+='</table></div>';
+  // detalhamento de intervalos (por sessão)
+  if(!geral){
+    var det=rows.filter(function(r){return r.aus>0;}).sort(function(a,b){return byName(a.v,b.v);});
+    if(det.length){
+      h+='<h2>Intervalos registrados</h2><div class="card">';
+      det.forEach(function(r,i){
+        h+='<div style="padding:7px 0;'+(i?"border-top:1px solid var(--line)":"")+'"><b class="sm">'+esc(r.v.nome)+'</b> <span class="mut xs">'+esc(r.v.partido)+'</span><div class="sm num mut">'+
+          (r.falta?"Ausente na sessão inteira":r.merged.map(function(x){return hm(x[0])+"–"+hm(x[1])+" ("+dur(x[1]-x[0])+")";}).join(" · "))+'</div></div>';
+      });
+      h+='</div>';
+    }
+  }
+  h+='<div class="note"><b>Metodologia.</b> Tempo de ausência = soma dos intervalos válidos, sem dupla contagem de períodos sobrepostos. '+
+     'Tempo de presença = duração monitorada − ausência. Percentual = presença ÷ duração monitorada × 100. '+
+     'Os dados refletem a <b>permanência observada</b> pelo voluntário durante o período acompanhado e não substituem o registro oficial de comparecimento da Câmara.</div>';
+  h+='<div class="print-only xs">Gerado em '+dmy(Date.now())+' às '+hm(Date.now())+' pelo aplicativo Observatório Limeira.</div>';
+  h+='<div class="row no-print" style="flex-wrap:wrap;margin-top:6px"><button class="btn pri grow" data-act="rPdf">PDF / Imprimir</button>'+
+     '<button class="btn grow" data-act="rCsv">Planilha (CSV)</button><button class="btn grow" data-act="rShare">'+(DESK?"Copiar resumo":"Compartilhar")+'</button></div>';
+  return h;
+}
+function media(rows){var d=0,a=0;rows.forEach(function(r){d+=r.dur;a+=r.aus;});return pct(d>0?(d-a)/d*100:100);}
+function relHead(t,sub,st){
+  return '<h2 style="margin-bottom:2px">'+esc(t)+'</h2><div class="sm mut" style="margin:0 2px">'+esc(sub)+'</div><div class="stats">'+
+    st.map(function(x){return '<div class="stat"><b>'+x[0]+'</b><span>'+x[1]+'</span></div>';}).join("")+'</div>';
+}
+function relData(){ // linhas para exportação
+  var enc=S.sessoes.filter(function(s){return s.fim!=null;}).sort(function(a,b){return a.inicio-b.inicio;});
+  var sess=UI.escopo==="geral"?enc:[sById(UI.escopo)];
+  var out=[];
+  sess.forEach(function(s){
+    s.vids.map(vById).sort(byName).forEach(function(v){
+      var c=calc(s,v.id);
+      out.push({s:s,v:v,c:c,int:c.falta?"sessão inteira":c.merged.map(function(x){return hm(x[0])+"-"+hm(x[1]);}).join(" | ")});
+    });
+  });
+  return out;
+}
+function csv(){
+  var q=function(x){return '"'+String(x).replace(/"/g,'""')+'"';};
+  var L=[["Sessão","Data","Início","Término","Duração monitorada (min)","Vereador","Nome completo","Partido","Saídas","Intervalos de ausência","Ausente (min)","Presente (min)","Presença (%)"].map(q).join(";")];
+  relData().forEach(function(r){
+    L.push([r.s.titulo,dmy(r.s.inicio),hm(r.s.inicio),r.s.fim==null?"em andamento":hm(r.s.fim),minDec(r.c.dur),r.v.nome,r.v.civil,r.v.partido,r.c.saidas,r.int,
+      minDec(r.c.aus),minDec(r.c.pres),(Math.round(r.c.pct*10)/10).toFixed(1).replace(".",",")].map(q).join(";"));
+  });
+  return "﻿"+L.join("\r\n");
+}
+function resumoTxt(){
+  var geral=UI.escopo==="geral", L=["OBSERVATÓRIO LIMEIRA — relatório de presença"];
+  var enc=S.sessoes.filter(function(s){return s.fim!=null;});
+  var rows;
+  if(geral){
+    var ids={}; enc.forEach(function(x){x.vids.forEach(function(i){ids[i]=1;});});
+    rows=Object.keys(ids).map(function(id){var c=calcGeral(id,enc);c.v=vById(id);return c;});
+    L.push("Geral — "+enc.length+" sessões encerradas");
+  }else{
+    var s=sById(UI.escopo);
+    rows=s.vids.map(function(id){var c=calc(s,id);c.v=vById(id);return c;});
+    L.push(s.titulo+" — "+dmy(s.inicio)+", "+hm(s.inicio)+" a "+(s.fim==null?"(em andamento)":hm(s.fim))+" — "+dur(sDur(s))+" monitorados");
+  }
+  L.push("");
+  rows.sort(function(a,b){return (a.pct-b.pct)||byName(a.v,b.v);}).forEach(function(r){
+    L.push(r.v.nome+" ("+r.v.partido+"): "+pct(r.pct)+" de presença · "+dur(r.aus)+" ausente");
+  });
+  L.push("","Permanência observada durante o período acompanhado; não substitui o registro oficial de comparecimento.");
+  return L.join("\n");
+}
+function copiar(t){
+  var ok=function(){toast("Resumo copiado. Cole no e-mail ou WhatsApp.");};
+  var velho=function(){var a=document.createElement("textarea");a.value=t;document.body.appendChild(a);a.select();
+    try{document.execCommand("copy");ok();}catch(e){toast("Não foi possível copiar.");} a.remove();};
+  if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok,velho); else velho();
+}
+function sheetRelIndividual(vid){
+  var v=vById(vid), geral=UI.escopo==="geral";
+  var sess=(geral?S.sessoes.filter(function(s){return s.fim!=null;}):[sById(UI.escopo)]).filter(function(s){return s.vids.indexOf(vid)>=0;})
+    .sort(function(a,b){return a.inicio-b.inicio;});
+  var g=calcGeral(vid,sess);
+  var h='<div class="row">'+avatar(v)+'<div class="grow"><h3>'+esc(v.nome)+'</h3><div class="sm mut">'+esc(v.civil)+(v.civil?" · ":"")+esc(v.partido)+'</div></div></div>';
+  h+='<div class="stats"><div class="stat"><b>'+dur(g.aus)+'</b><span>ausente</span></div><div class="stat"><b>'+dur(g.pres)+'</b><span>presente</span></div>'+
+     '<div class="stat"><b>'+pct(g.pct)+'</b><span>presença</span></div></div>';
+  sess.forEach(function(s){
+    var c=calc(s,vid);
+    h+='<div class="card" style="margin-bottom:8px"><div class="row"><b class="grow sm">'+esc(s.titulo)+'</b><span class="chip '+(c.pct>=90?"ok":c.pct>=70?"warn":"bad")+'">'+pct(c.pct)+'</span></div>'+
+       '<div class="xs mut">'+dmy(s.inicio)+' · monitorado '+dur(c.dur)+' · ausente '+dur(c.aus)+' · presente '+dur(c.pres)+'</div>'+
+       '<div class="sm num" style="margin-top:4px">'+(c.falta?"Ausente na sessão inteira":c.merged.length?c.merged.map(function(x){return hm(x[0])+"–"+hm(x[1])+" ("+dur(x[1]-x[0])+")";}).join(" · "):"Sem ausências registradas")+'</div></div>';
+  });
+  h+='<button class="btn wide ghost" data-act="close">Fechar</button>';
+  openSheet(h);
+}
+
+/* ======================= MENU / BACKUP ======================= */
+function sheetMenu(){
+  openSheet('<h3>Observatório Limeira</h3><div class="sm mut">Sistema de monitoramento da presença dos vereadores nas sessões ordinárias da Câmara Municipal de Limeira – SP.</div>'+
+    '<div class="note">Os dados ficam salvos apenas neste aparelho. Faça uma cópia de segurança para não perder os registros ao trocar de aparelho ou desinstalar o aplicativo.</div>'+
+    '<button class="btn wide" data-act="bkSave">Salvar cópia de segurança</button>'+
+    '<button class="btn wide" style="margin-top:8px" data-act="bkLoad">Restaurar cópia de segurança</button>'+
+    '<button class="btn wide" style="margin-top:8px" data-act="fonte">Abrir site da Câmara (lista de vereadores)</button>'+
+    '<button class="btn wide bad" style="margin-top:8px" data-act="reset">Apagar todos os dados</button>'+
+    '<div class="xs mut" style="margin-top:14px">Versão 1.0 · Trabalho de Administração de Sistemas de Informação (GL608). A ferramenta apoia a observação humana e não substitui a conferência com fontes oficiais.</div>'+
+    '<button class="btn wide ghost" style="margin-top:8px" data-act="close">Fechar</button>');
+}
+function nativeSave(name,mime,content){
+  if(window.Android&&Android.saveFile){Android.saveFile(name,mime,content);return;}
+  var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([content],{type:mime}));a.download=name;document.body.appendChild(a);a.click();a.remove();
+}
+$("#fileBackup").addEventListener("change",function(){
+  var f=this.files&&this.files[0]; this.value=""; if(!f) return;
+  var rd=new FileReader();
+  rd.onload=function(){
+    try{
+      var d=JSON.parse(rd.result);
+      if(!d||!Array.isArray(d.vereadores)||!Array.isArray(d.sessoes)) throw 0;
+      if(!confirm("Restaurar esta cópia? Os dados atuais serão substituídos.")) return;
+      S=d; save(); closeSheet(); UI.sessao=null; render(); toast("Cópia restaurada.");
+    }catch(e){toast("Arquivo inválido.");}
+  };
+  rd.readAsText(f);
+});
+
+/* ======================= AÇÕES ======================= */
+var ACT={
+  close:closeSheet,
+  vNovo:function(){sheetVereador("");},
+  vEdit:function(d){sheetVereador(d.id);},
+  vFoto:function(){$("#filePhoto").click();},
+  vFotoDel:function(){editFoto="";refreshFotoPrev();},
+  vSave:function(d){
+    var nome=$("#vNome").value.trim(); if(!nome){toast("Informe o nome.");return;}
+    var v=d.id?vById(d.id):null;
+    if(!v){v={id:uid()};S.vereadores.push(v);}
+    v.nome=nome;v.civil=$("#vCivil").value.trim();v.partido=$("#vPart").value.trim();v.foto=editFoto;v.ativo=$("#vAtivo").checked;
+    save();closeSheet();render();toast("Vereador salvo.");
+  },
+  vDel:function(d){
+    var usado=S.sessoes.some(function(s){return s.vids.indexOf(d.id)>=0;});
+    if(usado){
+      if(!confirm("Este vereador tem registros em sessões. Ele será marcado como inativo para preservar o histórico. Continuar?")) return;
+      vById(d.id).ativo=false;
+    }else{
+      if(!confirm("Excluir este vereador?")) return;
+      S.vereadores=S.vereadores.filter(function(v){return v.id!==d.id;});
+    }
+    save();closeSheet();render();
+  },
+  sNova:function(){
+    var ab=S.sessoes.filter(function(s){return s.fim==null;})[0];
+    if(ab&&!confirm("Já existe uma sessão em andamento ("+ab.titulo+"). Criar outra mesmo assim?")) return;
+    sheetSessao("");
+  },
+  sFimClr:function(){$("#sFim").value="";},
+  sSave:function(d){
+    var tit=$("#sTit").value.trim(),dt=$("#sData").value,ti=$("#sIni").value,tf=$("#sFim").value;
+    if(!tit||!dt||!ti){toast("Preencha identificação, data e início.");return;}
+    var ini=mkTime(dt,ti),fim=null;
+    if(tf){fim=mkTime(dt,tf);if(fim<=ini)fim+=24*60*MIN;}
+    var s=d.id?sById(d.id):null;
+    if(!s){
+      // início "agora": mantém os segundos reais para o cronômetro
+      var now=Date.now(); if(!tf&&Math.abs(now-ini)<MIN) ini=now;
+      if(!tf&&ini>now+MIN&&!confirm("O início informado está no futuro. Continuar?")) return;
+      s={id:uid(),ausencias:[],faltas:{},vids:S.vereadores.filter(function(v){return v.ativo;}).map(function(v){return v.id;})};
+      if(!s.vids.length){toast("Não há vereadores em exercício.");return;}
+      S.sessoes.push(s);
+    }else if(Math.floor(s.inicio/MIN)*MIN===ini){ ini=s.inicio; }
+    s.titulo=tit;s.inicio=ini;s.fim=fim;s.obs=$("#sObs").value.trim();
+    if(fim!=null) fecharAbertas(s);
+    save();closeSheet();UI.sessao=s.id;UI.tab="pre";render();
+  },
+  sDel:function(d){
+    if(!confirm("Excluir esta sessão e todos os registros dela?")) return;
+    S.sessoes=S.sessoes.filter(function(s){return s.id!==d.id;});
+    save();closeSheet();UI.sessao=null;render();
+  },
+  sOpen:function(d){UI.sessao=d.id;render();window.scrollTo(0,0);},
+  sBack:function(){UI.sessao=null;render();},
+  sEdit:function(d){sheetSessao(d.id);},
+  sRel:function(d){UI.escopo=d.id;go("rel");},
+  sEnc:function(d){
+    var s=sById(d.id);
+    if(!confirm("Encerrar a sessão agora ("+hm(Date.now())+")? Ausências em aberto serão fechadas neste horário.")) return;
+    s.fim=Date.now();fecharAbertas(s);save();render();toast("Sessão encerrada.");
+  },
+  sReab:function(d){
+    var s=sById(d.id);
+    if(!confirm("Reabrir a sessão? O cronômetro volta a contar a partir do início original.")) return;
+    s.fim=null;save();render();
+  },
+  sSaiu:function(d){
+    var s=sById(UI.sessao);
+    s.ausencias.push({id:uid(),vid:d.id,ini:Math.max(Date.now(),s.inicio),fim:null,obs:""});
+    save();render();
+  },
+  sVoltou:function(d){
+    var s=sById(UI.sessao),now=Date.now();
+    s.ausencias.forEach(function(x){if(x.vid===d.id&&x.fim==null)x.fim=now;});
+    save();render();
+  },
+  sDet:function(d){sheetDetalhe(sById(UI.sessao),d.id);},
+  aDel:function(d){
+    var s=sById(UI.sessao);
+    s.ausencias=s.ausencias.filter(function(x){return x.id!==d.id;});
+    save();render();sheetDetalhe(s,d.vid);
+  },
+  aAdd:function(d){
+    var s=sById(UI.sessao),ti=$("#aIni").value,tf=$("#aFim").value,mn=parseFloat($("#aMin").value);
+    if(!ti){toast("Informe o horário de saída.");return;}
+    var a=parseInSession(s,ti),b;
+    if(tf){b=parseInSession(s,tf);if(b<=a){toast("O retorno deve ser depois da saída.");return;}}
+    else if(mn>0){b=a+mn*MIN;}
+    else{toast("Informe o retorno ou a duração.");return;}
+    var lim=sEnd(s);
+    if(a>=lim){toast("A saída está fora do período da sessão.");return;}
+    if(a<s.inicio)a=s.inicio;
+    var cortou=b>lim; if(cortou)b=lim;
+    s.ausencias.push({id:uid(),vid:d.vid,ini:a,fim:b,obs:$("#aObs").value.trim()});
+    save();render();sheetDetalhe(s,d.vid);
+    toast(cortou?"Intervalo limitado ao período da sessão.":"Intervalo adicionado.");
+  },
+  rDet:function(d){sheetRelIndividual(d.id);},
+  rPdf:function(){
+    if(window.Android&&Android.print) Android.print("Relatório - Observatório Limeira"); else window.print();
+  },
+  rCsv:function(){nativeSave("observatorio-limeira-"+ymd(Date.now())+".csv","text/csv",csv());},
+  rShare:function(){
+    var t=resumoTxt();
+    if(window.Android&&Android.share) Android.share("Observatório Limeira — relatório de presença",t);
+    else if(!DESK&&navigator.share) navigator.share({text:t});
+    else copiar(t);
+  },
+  bkSave:function(){nativeSave("observatorio-limeira-backup-"+ymd(Date.now())+".json","application/json",JSON.stringify(S));},
+  bkLoad:function(){$("#fileBackup").click();},
+  fonte:function(){ if(DESK){var x=new XMLHttpRequest();x.open("POST","/open?t="+TOKEN,true);x.send();} else location.href=FONTE; },
+  reset:function(){
+    if(!confirm("Apagar TODOS os dados (sessões, registros e alterações na lista de vereadores)?")) return;
+    if(!confirm("Tem certeza? Esta ação não pode ser desfeita.")) return;
+    S=seedState();save();closeSheet();UI.sessao=null;UI.escopo="";go("ver");
+  }
+};
+function fecharAbertas(s){s.ausencias.forEach(function(x){if(x.fim==null||x.fim>s.fim)x.fim=Math.max(x.ini,s.fim);});}
+
+document.addEventListener("click",function(e){
+  if(e.target.id==="ov"){closeSheet();return;}
+  var nb=e.target.closest("nav button"); if(nb){if(nb.dataset.tab==="pre"&&UI.tab==="pre")UI.sessao=null;go(nb.dataset.tab);return;}
+  if(e.target.closest("#btnMenu")){sheetMenu();return;}
+  var el=e.target.closest("[data-act]"); if(!el) return;
+  var f=ACT[el.dataset.act]; if(f) f(el.dataset);
+});
+document.addEventListener("input",function(e){
+  if(e.target.id==="busca"){UI.busca=e.target.value;$("#vgrid").innerHTML=vGrid();}
+  if(e.target.id==="vNome"||e.target.id==="vPart"){if(!editFoto)refreshFotoPrev();}
+});
+document.addEventListener("change",function(e){
+  if(e.target.id==="fPartido"){UI.partido=e.target.value;$("#vgrid").innerHTML=vGrid();}
+  if(e.target.id==="rEscopo"){UI.escopo=e.target.value;render();}
+  if(e.target.id==="dFalta"){
+    var s=sById(UI.sessao); s.faltas=s.faltas||{};
+    if(e.target.checked) s.faltas[e.target.dataset.id]=true; else delete s.faltas[e.target.dataset.id];
+    save();render();sheetDetalhe(s,e.target.dataset.id);
+  }
+});
+
+load();
+// se houver sessão em andamento, abre direto nela
+(function(){var ab=S.sessoes.filter(function(s){return s.fim==null;})[0];if(ab){UI.tab="pre";UI.sessao=ab.id;}})();
+render();
+</script>
+</body>
+</html>
